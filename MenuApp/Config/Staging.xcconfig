@@ -8,5 +8,5 @@
 // Configuration settings file format documentation can be found at:
 // https://developer.apple.com/documentation/xcode/adding-a-build-configuration-file-to-your-project
 
-BASE_API_URL = https:${}bfac43d8-02e4-4a01-9170-1a3dd3419ef7.mock.pstmn.io
+BASE_API_URL = bfac43d8-02e4-4a01-9170-1a3dd3419ef7.mock.pstmn.io
 

@@ -36,9 +36,7 @@ enum MenuRouter: Router {
     
     /// The complete URL for the endpoint
     var url: URL? {
-        let baseUrl: String = AppConfig.value(for: .baseApiUrl)
-        let fullUrl = baseUrl + path
-        return URL(string: fullUrl)
+        AppConfig.baseUrl.appendingPathComponent(path)
     }
     
     /// Creates a URLRequest for the endpoint
