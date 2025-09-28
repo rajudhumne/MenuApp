@@ -14,9 +14,9 @@ protocol MenuRepositoryProtocol {
 
 final class MenuRepository: MenuRepositoryProtocol {
     
-    private let networkManager: NetworkManager
+    private let networkManager: NetworkManagerProtocol
     
-    init(networkManager: NetworkManager) {
+    init(networkManager: NetworkManagerProtocol) {
         self.networkManager = networkManager
     }
     

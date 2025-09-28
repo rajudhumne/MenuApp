@@ -9,20 +9,20 @@ import UIKit
 
 class MenuDetailViewController: UIViewController {
     
+    // MARK: - Outlets
     @IBOutlet weak var itemImageView: UIImageView!
     @IBOutlet weak var itemName: UILabel!
     @IBOutlet weak var itemDescription: UILabel!
-    
     @IBOutlet weak var addToCartButton: UIButton!
-    
-    @IBOutlet private weak var decrementButton: UIButton!
+    @IBOutlet weak var decrementButton: UIButton!
     @IBOutlet weak var dismissButton: UIButton!
-    @IBOutlet private weak var quantityLabel: UILabel!
-    @IBOutlet private weak var incrementButton: UIButton!
-    
+    @IBOutlet weak var quantityLabel: UILabel!
+    @IBOutlet weak var incrementButton: UIButton!
     @IBOutlet weak var quantityContainerView: UIView!
     
-    private let item: MenuItemDetail
+    //MARK: - Local properties
+    
+    let item: MenuItemDetail
     private var quantity: Int = 1 {
         didSet {
             updateQuantityUI()
@@ -30,49 +30,42 @@ class MenuDetailViewController: UIViewController {
         }
     }
     
+    // MARK: - Initizaliation
     init?(coder: NSCoder,item: MenuItemDetail) {
         self.item = item
         super.init(coder: coder)
     }
     
-    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-    
+    required init?(coder: NSCoder) { 
+        fatalError("init(coder:) has not been implemented. Use init(coder:item:) instead.") 
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        updateUI()
+        setupUI()
     }
     
-    private func updateUI() {
+    private func setupUI() {
         updateAddToCartButton()
         updateQuantityUI()
         addToCartButton.layer.cornerRadius = 10
-        dismissButton.layer.cornerRadius = dismissButton.frame.height / 2 
+        dismissButton.layer.cornerRadius = dismissButton.frame.height / 2
         itemImageView.contentMode = .scaleAspectFill
         itemImageView.loadImage(from: item.image)
         itemName.text = item.name
         itemDescription.text = item.description
-        quantityContainerView.addTopShadow()
-        
+        quantityContainerView?.addTopShadow()
     }
     
     // MARK: - Actions
-    @IBAction private func decrementButtonTapped(_ sender: UIButton) {
+    @IBAction func decrementButtonTapped(_ sender: UIButton) {
         if quantity > 1 {
             quantity -= 1
         }
-        
-        // Add haptic feedback
-        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-        impactFeedback.impactOccurred()
     }
     
-    @IBAction private func incrementButtonTapped(_ sender: UIButton) {
+    @IBAction func incrementButtonTapped(_ sender: UIButton) {
         quantity += 1
-        
-        // Add haptic feedback
-        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
-        impactFeedback.impactOccurred()
     }
     
     @IBAction func addToCartButtonTap(_ sender: Any) {
@@ -83,20 +76,20 @@ class MenuDetailViewController: UIViewController {
         self.dismiss(animated: true)
     }
     
+    // MARK: - Helper Functions
     private func updateQuantityUI() {
-        quantityLabel.text = "\(quantity)"
-        decrementButton.isEnabled = quantity > 1
-        decrementButton.alpha = quantity > 1 ? 1.0 : 0.5
+        quantityLabel?.text = "\(quantity)"
+        decrementButton?.isEnabled = quantity > 1
+        decrementButton?.alpha = quantity > 1 ? 1.0 : 0.5
     }
     
     private func updateAddToCartButton() {
         let totalPrice = item.price * Double(quantity)
-        addToCartButton.setTitle("Add to Cart • £\(String(format: "%.2f", totalPrice))", for: .normal)
+        addToCartButton?.setTitle("Add to Cart • £\(totalPrice.toString())", for: .normal)
     }
 
     deinit {
-        itemImageView.cancelImageLoading()
+        itemImageView?.cancelImageLoading()
         debugPrint("Deinit called for \(String(describing: self))")
     }
-    
 }

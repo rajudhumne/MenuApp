@@ -36,10 +36,10 @@ enum ImageLoaderError: LocalizedError {
 final class ImageLoader: ImageLoaderProtocol {
     
     private let cache = NSCache<NSString, UIImage>()
-    private let session: URLSession
+    private let session: URLSessionProtocol
     private var loadingTasks: [String: Task<UIImage, Error>] = [:]
     
-    init(session: URLSession = .shared) {
+    init(session: URLSessionProtocol = URLSession.shared) {
         self.session = session
         setupCache()
     }
@@ -70,7 +70,8 @@ final class ImageLoader: ImageLoaderProtocol {
                 throw ImageLoaderError.invalidURL
             }
             
-            let (data, _) = try await session.data(from: imageURL)
+            let request = URLRequest(url: imageURL)
+            let (data, _) = try await session.data(for: request)
             
             guard let image = UIImage(data: data) else {
                 throw ImageLoaderError.invalidData

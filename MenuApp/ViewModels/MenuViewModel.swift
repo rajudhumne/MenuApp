@@ -13,6 +13,7 @@ protocol MenuViewModelProtocol {
     var delegate: MenuViewModelDelegateProtocol? { get set }
 }
 
+@MainActor
 protocol MenuViewModelDelegateProtocol {
     func didUpdateavailableItems(data: [String : [MenuItem]])
     func didSelectItem(_ item: MenuItemDetail)
@@ -33,26 +34,18 @@ final class MenuViewModelImpl: MenuViewModelProtocol {
         do {
             let items = try await menuRepository.getMenu()
             let grouped = Dictionary(grouping: items, by: { $0.category })
-            await MainActor.run {
-                delegate?.didUpdateavailableItems(data: grouped)
-            }
+            await delegate?.didUpdateavailableItems(data: grouped)
         } catch {
-            await MainActor.run {
-                delegate?.didFailWithError(error)
-            }
+            await delegate?.didFailWithError(error)
         }
     }
     
     func selectItem(at index: Int) async throws {
         do {
             let item = try await menuRepository.getMenuItemDetail(id: index)
-            await MainActor.run {
-                delegate?.didSelectItem(item)
-            }
+            await delegate?.didSelectItem(item)
         } catch {
-            await MainActor.run {
-                delegate?.didFailWithError(error)
-            }
+            await delegate?.didFailWithError(error)
         }
     }
 }

@@ -15,19 +15,22 @@ class MenuViewController: UIViewController {
     
     // MARK: Properties
     private var viewModel: MenuViewModelProtocol
-    private var dataSource: MenuTableViewDataSource!
-    private var errorHandler: ErrorHandlerProtocol
+    private var dataSource: MenuViewDataSourceProtocol
+    private let errorHandler: ErrorHandlerProtocol
     
     // MARK: - Initialization
     
-    init?(coder: NSCoder, viewModel: MenuViewModelProtocol, errorHandler: ErrorHandlerProtocol = ErrorHandler()) {
+    init?(coder: NSCoder, viewModel: MenuViewModelProtocol,
+          dataSource: MenuViewDataSourceProtocol = MenuTableViewDataSource(),
+          errorHandler: ErrorHandlerProtocol = ErrorHandler()) {
         self.viewModel = viewModel
+        self.dataSource = dataSource
         self.errorHandler = errorHandler
         super.init(coder: coder)
     }
     
     required init?(coder: NSCoder) {
-        fatalError("Use `init(coder:viewModel:errorHandler:)` to instantiate a `MenuViewController` instance.")
+        fatalError("Use `init(coder:viewModel:dataSource:errorHandler:)` to instantiate a `MenuViewController` instance.")
     }
     
     // MARK: - Lifecycle
@@ -44,7 +47,6 @@ class MenuViewController: UIViewController {
         loadingIndicator.startAnimating()
         
         // Setup data source
-        dataSource = MenuTableViewDataSource()
         tableView.dataSource = dataSource
         tableView.delegate = self
         // Set row height
@@ -62,10 +64,8 @@ class MenuViewController: UIViewController {
     private func showError(_ error: Error) {
         errorHandler.handle(error, in: self)
     }
-    
 }
 
-// Data source methods are now handled by MenuTableViewDataSource
 extension MenuViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         loadingIndicator.startAnimating()
@@ -92,32 +92,37 @@ extension MenuViewController: UITableViewDelegate {
 }
 
 extension MenuViewController: MenuViewModelDelegateProtocol {
+    
     func didUpdateavailableItems(data: [String : [MenuItem]]) {
         dataSource.updateData(data)
-        DispatchQueue.main.async { [weak self] in
-            self?.loadingIndicator.stopAnimating()
-            self?.tableView.reloadData()
-        }
+        loadingIndicator.stopAnimating()
+        tableView.reloadData()
     }
-    
+
     func didSelectItem(_ item: MenuItemDetail) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.loadingIndicator.stopAnimating()
-            guard let vc = self.storyboard?.instantiateViewController(identifier: "MenuDetailViewController", creator: { coder in
-                return MenuDetailViewController(coder: coder, item: item)
-            }) else {
-                fatalError("Failed to load EditUserViewController from storyboard.")
-            }
+        loadingIndicator.stopAnimating()
+        do {
+            let vc = try createMenuDetailViewController(with: item)
             self.navigationController?.present(vc, animated: true)
+        } catch {
+            showError(error)
         }
     }
     
-    func didFailWithError(_ error: any Error) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.loadingIndicator.stopAnimating()
-            self.showError(error)
+    // MARK: - Helper Methods
+    private func createMenuDetailViewController(with item: MenuItemDetail) throws -> MenuDetailViewController {
+        guard let storyboard = self.storyboard else {
+            throw MenuError.storyboardLoadingFailed
         }
+        
+        let vc = storyboard.instantiateViewController(identifier: MenuDetailViewController.className, creator: { coder in
+            return MenuDetailViewController(coder: coder, item: item)
+        })
+        return vc
+    }
+    
+    func didFailWithError(_ error: Error) {
+        loadingIndicator.stopAnimating()
+        showError(error)   
     }
 }

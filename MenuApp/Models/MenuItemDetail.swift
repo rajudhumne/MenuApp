@@ -14,5 +14,4 @@ struct MenuItemDetail: Codable {
     let category: String
     let description: String
     let image: String
-    
 }

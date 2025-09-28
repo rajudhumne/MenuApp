@@ -13,6 +13,7 @@ enum MenuError: LocalizedError {
     case networkUnavailable
     case invalidData
     case itemNotFound
+    case storyboardLoadingFailed
     case unknown(Error)
     
     var errorDescription: String? {
@@ -23,6 +24,8 @@ enum MenuError: LocalizedError {
             return "Unable to load menu data. Please try again later"
         case .itemNotFound:
             return "Menu item not found"
+        case .storyboardLoadingFailed:
+            return "Unable to load the requested screen. Please try again later"
         case .unknown(let error):
             return error.localizedDescription
         }

@@ -8,7 +8,7 @@
 import UIKit
 
 // MARK: - Menu Table View Data Source
-final class MenuTableViewDataSource: NSObject, UITableViewDataSource {
+final class MenuTableViewDataSource: NSObject, MenuViewDataSourceProtocol {
     
     // MARK: - Properties
     private var menuItems: [String: [MenuItem]] = [:]
@@ -21,8 +21,10 @@ final class MenuTableViewDataSource: NSObject, UITableViewDataSource {
     }
     
     func getItem(at indexPath: IndexPath) -> MenuItem? {
+        guard indexPath.section < categories.count else { return nil }
         let category = categories[indexPath.section]
-        return menuItems[category]?[indexPath.row]
+        guard let items = menuItems[category], indexPath.row < items.count else { return nil }
+        return items[indexPath.row]
     }
     
     func getCategory(at section: Int) -> String? {
@@ -34,7 +36,6 @@ final class MenuTableViewDataSource: NSObject, UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return categories.count
     }
-    
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         guard let category = getCategory(at: section) else { return 0 }
@@ -48,9 +49,8 @@ final class MenuTableViewDataSource: NSObject, UITableViewDataSource {
         cell.selectionStyle = .none
         if let item = getItem(at: indexPath) {
             config.text = item.name
-            config.secondaryText = String(format: "$%.2f", item.price)
+            config.secondaryText = "£\(item.price.toString())"
             cell.contentConfiguration = config
-            
         }
         return cell
     }

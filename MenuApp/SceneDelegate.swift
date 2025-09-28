@@ -18,7 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             return
         }
     
-        let networkManager = NetworkManager(session: .shared)
+        let networkManager = NetworkManager(session: URLSession.shared)
         let viewmodel = MenuViewModelImpl(menuRepository:
                                             MenuRepository(networkManager: networkManager))
         
